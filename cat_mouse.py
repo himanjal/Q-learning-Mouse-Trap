@@ -12,12 +12,12 @@ TRAP = 2
 BLOCK = 3
 GOAL = 4
 MOUSE = 5
-NUMMOVES = 20000
+NUMMOVES = 200000
 
 # Reward constants
-CHEESE_REWARD = 100
-TRAP_REWARD = -500
-GOAL_REWARD = 500
+CHEESE_REWARD = 6
+TRAP_REWARD = -5
+GOAL_REWARD = 5
 
 # Move action variables
 UP = (-1, 0)
@@ -74,8 +74,8 @@ def generate_board():
   Return: 
 	   a board made of 2D array, and the height and width
   """
-  width = random.randint(2,10)
-  height = random.randint(2,10)
+  width = random.randint(2,30)
+  #height = random.randint(2,10)
   height = width
   board = [[0 for x in range(width)] for y in range(height)]
   
@@ -83,6 +83,8 @@ def generate_board():
   for w in range(height):
 	for h in range(width):
 		x = random.randint(0, 3)
+		if((x==3 or x == 2) and random.randint(0,100) > 70):
+			x = 0
 		board[w][h] = x 
 	  
   #marking origin as safe position
@@ -296,7 +298,7 @@ def get_updated_mouse(mouse, move):
 
 def find_best_move(mouse):
 	#very small chance of making a random possible move to avoid local maxima
-	if random.random() < 0.001:
+	if random.random() < 0.01:
 		return random.choice(valid_moves(mouse))
 	possible = []
 	for mv in valid_moves(mouse):
@@ -335,10 +337,12 @@ def find_best_move(mouse):
 
 def printAll(next_move, mouse, board):
 	clear()
-	printLegend()
-	print_move(next_move, mouse)
 	printBoard(board, mouse)
+	print_move(next_move, mouse)
 	print
+	printLegend()
+	print
+
 
 def learn(board, mouse):
 	"""Trains our mouse and runs the program."""
@@ -385,28 +389,31 @@ def learn(board, mouse):
 			backupBoard[mouse[0]][mouse[1]] = START
 		mouse = get_updated_mouse(mouse, next_move)
 	if not solvable:
-                printAll(next_move, mouse, board)
-		print "   No solution found"
+                #printAll(next_move, mouse, board)
+		#print "   No solution found"
+		clear()
 		print
 		print
 		return 1
 	return 0
 
-#The random board for our program
-BOARD, H, W = generate_board()
-backupBoard = [[0 for x in range(W)] for y in range(H)]
-for x in range(len(BOARD)):
-	for y in range(len(BOARD[0])):
-		backupBoard[x][y] = BOARD[x][y]
+result = 1
+while(result == 1):
+	#The random board for our program
+	BOARD, H, W = generate_board()
+	backupBoard = [[0 for x in range(W)] for y in range(H)]
+	for x in range(len(BOARD)):
+		for y in range(len(BOARD[0])):
+			backupBoard[x][y] = BOARD[x][y]
 
-# initialize our Q matrix
-Q = q_init(H, W)
-printBoard(BOARD, (0,0))
-print
-#Learn the board
-NUM_LESSONS = 100000
-learn(BOARD, (0, 0))
-
+	# initialize our Q matrix
+	Q = q_init(H, W)
+	clear()
+	printBoard(BOARD, (0,0))
+	print
+	#Learn the board
+	NUM_LESSONS = 100000
+	result = learn(BOARD, (0, 0))
 
 
 
